@@ -3,7 +3,7 @@
 memo="meta_train"
 ### **************** meta_train ********************
 ## MetaLight
-python meta_train.py --memo ${memo} --algorithm MetaLight 
+python meta_train.py --memo ${memo} --algorithm MetaLight --visible_gpu=1
 echo "metalight: meta_train complete"
 
 ## MAML 

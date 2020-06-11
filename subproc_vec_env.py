@@ -23,10 +23,6 @@ class EnvWorker(mp.Process):
         self.task_id = None
         self.done = False
 
-        self.env = CityFlowEnv(
-            path_to_log=self.dic_path["PATH_TO_LOG"],
-            path_to_work_directory=self.dic_path["PATH_TO_DATA"],
-            dic_traffic_env_conf=self.dic_traffic_env_conf)
 
     def empty_step(self):
         observation = [{'cur_phase': [0], 'lane_num_vehicle': [0, 0, 0, 0, 0, 0, 0, 0]}]
@@ -57,6 +53,10 @@ class EnvWorker(mp.Process):
             return False
 
     def run(self):
+        self.env = CityFlowEnv(
+            path_to_log=self.dic_path["PATH_TO_LOG"],
+            path_to_work_directory=self.dic_path["PATH_TO_DATA"],
+            dic_traffic_env_conf=self.dic_traffic_env_conf)
         while True:
             command, data = self.remote.recv()
             if command == 'step':

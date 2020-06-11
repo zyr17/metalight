@@ -340,33 +340,34 @@ class CityFlowEnv:
             The following commented codes shows the latest API of cityflow. 
             However, it will somehow hang in the multi-process. Therefore, another version of cityflow is used here, "engine.cpython-36m-x86_64-linux-gnu.so meta2:/metalight"
         """
-        #import cityflow as engine
-        #config_dict = {
-        #    "interval": self.dic_traffic_env_conf["INTERVAL"],
-        #    "seed": 0,
-        #    "dir": "",
-        #    "roadnetFile": os.path.join(self.path_to_work_directory, self.dic_traffic_env_conf['ROADNET_FILE']),
-        #    "flowFile": os.path.join(self.path_to_work_directory, self.dic_traffic_env_conf["FLOW_FILE"]),
-        #    "rlTrafficLight": self.dic_traffic_env_conf["RLTRAFFICLIGHT"],
-        #    "saveReplay": self.dic_traffic_env_conf["SAVEREPLAY"],
-        #    "roadnetLogFile": "frontend/web/testcase_roadnet_3x3.json",
-        #    "replayLogFile": "frontend/web/testcase_replay_3x3.txt"
-        #}
-        #config_path = os.path.join(path_to_log, "cityflow_config")
-        #with open(config_path, "w") as f:
-        #    config_obj = json.dump(config_dict, f)
-        #    print("dump cityflow config")
-        #    print(config_path)
-        #self.eng = engine.Engine(config_path, self.dic_traffic_env_conf["THREADNUM"])
+        import cityflow as engine
+        vol = utils.get_total_traffic_volume(self.dic_traffic_env_conf["TRAFFIC_FILE"])
+        config_dict = {
+            "interval": self.dic_traffic_env_conf["INTERVAL"],
+            "seed": 0,
+            "dir": "",
+            "roadnetFile": os.path.join(self.path_to_work_directory, self.dic_traffic_env_conf['ROADNET_FILE']),
+            "flowFile": os.path.join(self.path_to_work_directory, self.dic_traffic_env_conf["FLOW_FILE"]),
+            "rlTrafficLight": self.dic_traffic_env_conf["RLTRAFFICLIGHT"],
+            "saveReplay": self.dic_traffic_env_conf["SAVEREPLAY"],
+            "roadnetLogFile": os.path.join(self.path_to_log, "roadnet_%s.json" % vol),
+            "replayLogFile": os.path.join(self.path_to_log, "replay_%s.txt" % vol)
+        }
+        config_path = os.path.join(path_to_log, "cityflow_config")
+        with open(config_path, "w") as f:
+            config_obj = json.dump(config_dict, f)
+            print("dump cityflow config")
+            print(config_path)
+        self.eng = engine.Engine(config_path, self.dic_traffic_env_conf["THREADNUM"])
 
-        import engine
-        self.eng = engine.Engine(self.dic_traffic_env_conf["INTERVAL"],
-                                 self.dic_traffic_env_conf["THREADNUM"],
-                                 self.dic_traffic_env_conf["SAVEREPLAY"],
-                                 self.dic_traffic_env_conf["RLTRAFFICLIGHT"],
-                                 False)
-        self.load_roadnet(self.dic_traffic_env_conf["ROADNET_FILE"])
-        self.load_flow(self.dic_traffic_env_conf["FLOW_FILE"])
+        #import engine
+        #self.eng = engine.Engine(self.dic_traffic_env_conf["INTERVAL"],
+        #                         self.dic_traffic_env_conf["THREADNUM"],
+        #                         self.dic_traffic_env_conf["SAVEREPLAY"],
+        #                         self.dic_traffic_env_conf["RLTRAFFICLIGHT"],
+        #                         False)
+        #self.load_roadnet(self.dic_traffic_env_conf["ROADNET_FILE"])
+        #self.load_flow(self.dic_traffic_env_conf["FLOW_FILE"])
 
         self.list_intersection = None
         self.list_inter_log = None
@@ -564,6 +565,7 @@ class CityFlowEnv:
         self.log_replay()
 
     def log_replay(self):
+        return
         vol = utils.get_total_traffic_volume(self.dic_traffic_env_conf["TRAFFIC_FILE"])
         # self.eng.print_log(os.path.join("data", "frontend", "web", "roadnet_1_1.json"),
         #                         os.path.join("data", "frontend", "web", "replay_1_1_%s.txt"%vol))
