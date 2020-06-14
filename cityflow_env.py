@@ -565,9 +565,14 @@ class CityFlowEnv:
         self.log_replay()
 
     def log_replay(self):
-        return
+        if not self.dic_traffic_env_conf["SAVEREPLAY"]:
+            print('SAVEREPLAY not set!')
+            return
+        #return
         vol = utils.get_total_traffic_volume(self.dic_traffic_env_conf["TRAFFIC_FILE"])
         # self.eng.print_log(os.path.join("data", "frontend", "web", "roadnet_1_1.json"),
         #                         os.path.join("data", "frontend", "web", "replay_1_1_%s.txt"%vol))
-        self.eng.print_log(os.path.join(self.path_to_log, "roadnet_%s.json" % vol),
-                           os.path.join(self.path_to_log, "replay_%s.txt" % vol))
+        #self.eng.print_log(os.path.join(self.path_to_log, "roadnet_%s.json" % vol),
+        #                   os.path.join(self.path_to_log, "replay_%s.txt" % vol))
+        self.eng.set_log_file(os.path.join(self.path_to_log, "roadnet_%s.json" % vol),
+                           os.path.join(self.path_to_log, "replay_%s.txt" % vol), True)
