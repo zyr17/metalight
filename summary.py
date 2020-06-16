@@ -19,7 +19,7 @@ mlp.rc('font', **font)
 
 NAN_LABEL = -1
 
-
+# summary_meta_test计算统计值
 def get_metrics(duration_list, min_duration, min_duration_id,
                 traffic_name, total_summary, mode_name, save_path, num_rounds, min_duration2=None, min_duration_log=None):
     validation_duration_length = 10
@@ -95,6 +95,7 @@ def get_metrics(duration_list, min_duration, min_duration_id,
 
     return total_summary
 
+# 同util中
 def get_planed_entering(flowFile, episode_len):
     list_flow = json.load(open(flowFile, "r"))
     dic_traj = {'vehicle_id':[], 'planed_enter_time':[]}
@@ -124,6 +125,7 @@ def cal_travel_time(df_vehicle_actual_enter_leave, df_vehicle_planed_enter, epis
     travel_time = df_res["travel_time"].mean()
     return travel_time
 
+# 找出所有test的文件位置，从保存的csv中获取结果
 def summary_meta_test(memo):
     ''' directly copy the write_summary'''
     total_summary = {
@@ -167,6 +169,7 @@ def summary_meta_test(memo):
 
     total_result.to_csv(os.path.join("summary", memo, "total_test_results.csv"))
 
+# 和summary_meta_test类似
 def summary_sotl(memo):
     # each_round_train_duration
     total_summary = {

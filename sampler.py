@@ -106,6 +106,7 @@ class BatchSampler(object):
             shutil.copy(os.path.join(self.dic_path["PATH_TO_DATA"], self.dic_traffic_env_conf["ROADNET_FILE"]),
                         os.path.join(path, self.dic_traffic_env_conf["ROADNET_FILE"]))
 
+    # MAML用采样。采到一个样本完整为止，同时保证数量多于batch size。TODO num_workers是干什么的
     def sample_maml(self, policy, task=None, batch_id=None, params=None):
         for i in range(self.batch_size):
             self.queue.put(i)
@@ -126,6 +127,7 @@ class BatchSampler(object):
         #self.envs.bulk_log()
         return episodes
 
+    # SOTL采样，使用SOTLAgent，只有choose_action有用，params无用。
     def sample_sotl(self, policy, task=None, batch_id=None, params=None):
         for i in range(self.batch_size):
             self.queue.put(i)
@@ -145,6 +147,9 @@ class BatchSampler(object):
                       self.dic_traffic_env_conf['FLOW_FILE'])
         #self.envs.bulk_log()
 
+    """
+    MetaLight采样。采到一定次数后对meta更新
+    """
     def sample_metalight(self, policy, tasks, batch_id, params=None, target_params=None, episodes=None):
         for i in range(len(tasks)):
             self.queue.put(i)
@@ -219,6 +224,10 @@ class BatchSampler(object):
 
         #self.envs.bulk_log()
 
+    """
+    使用已训练完成的meta model，训练一轮的效果和训练完成的效果
+        old_episodes: 一些历史记录。不论有没有之后会有一个episode的新采样
+    """
     def sample_meta_test(self, policy, task, batch_id, params=None, target_params=None, old_episodes=None):
         for i in range(self.batch_size):
             self.queue.put(i)
@@ -271,6 +280,7 @@ class BatchSampler(object):
         self.envs.bulk_log()
         return params, target_params, episodes
 
+    # 在sample_meta_test中调用，新建一个环境进行一次测试
     def single_test_sample(self, policy, task, batch_id, params):
         policy.load_params(params)
 

@@ -8,6 +8,11 @@ import config
 import time
 
 class Agent():
+    """
+    dic_agent_conf: agent的配置数据
+    dic_traffic_env_conf: 环境的配置数据，用来查找输入输出格式、文件名称等
+    dic_path: 未使用
+    """
     def __init__(self, dic_agent_conf, dic_traffic_env_conf, dic_path):
         t1 = time.time()
         self.dic_agent_conf = dic_agent_conf
@@ -68,6 +73,7 @@ class Agent():
         self._sess.run(tf.global_variables_initializer())
         print("build policy time:", time.time() - t1)
 
+    # 建图
     def _build_graph(self, dim_input, dim_output, norm):
         def model_summary():
             model_vars = tf.trainable_variables()
@@ -160,6 +166,7 @@ class Agent():
             ValueError("Can't recognize the loss type {}".format(loss_type))
         return loss_fn
 
+    # 任务模块预测
     def learning_predict(self, learning_x):
         with self._sess.as_default():
             with self._sess.graph.as_default():
@@ -168,6 +175,7 @@ class Agent():
                 }
                 return self._sess.run(self._learning_output, feed_dict=feed_dict)
 
+    # 元模块预测
     def meta_predict(self, meta_x):
         with self._sess.as_default():
             with self._sess.graph.as_default():
@@ -208,10 +216,17 @@ class Agent():
 
         return action
 
+    # 调整EPS
     def decay_epsilon(self, batch_id):
         decayed_epsilon = self.dic_agent_conf["EPSILON"] * pow(self.dic_agent_conf["EPSILON_DECAY"], batch_id)
         self.dic_agent_conf["EPSILON"] = max(decayed_epsilon, self.dic_agent_conf["MIN_EPSILON"])
 
+    """
+    根据给定的两个网络参数计算y值。非真实动作保留params的结果，真实动作换成reward+target的结果
+        episodes: BatchEpisodes
+        params: 网络参数
+        target_params: 固定网络参数
+    """
     def fit(self, episodes, params, target_params):
         self.load_params(params)
         input_x = episodes.get_x()
@@ -229,6 +244,13 @@ class Agent():
 
         episodes.prepare_y(q_values)
 
+    """
+    通过给定参数和样本进行训练并返回更新的参数
+        episodes: 样本
+        params: 网络参数
+        lr_step: 学习阶段，用于推算学习率，但是实验中LR固定为1e-3
+        slice_index: 选择样本的ID
+    """
     def update_params(self, episodes, params, lr_step, slice_index):
         learning_x = episodes.get_x()[slice_index]
         learning_y = episodes.get_y()[slice_index]
@@ -268,17 +290,22 @@ class Agent():
         t2 = time.time()
         return params
 
+    # 载入参数
     def load_params(self, params):
         with self._sess.as_default():
            with self._sess.graph.as_default():
                feed_dict = {self._weights_inp[key]: params[key] for key in self._weights.keys()}
                self._sess.run(self._assign_op, feed_dict=feed_dict)
 
+    # 保存参数
     def save_params(self):
         with self._sess.as_default():
             with self._sess.graph.as_default():
                 return self._sess.run(self._weights)
 
+    """
+    MAML用计算梯度
+    """
     def cal_grads(self, learning_episodes, meta_episodes, slice_index, params):
         self.load_params(params)
         t1 = time.time()
@@ -299,6 +326,9 @@ class Agent():
         t2 = time.time()
         return res
 
+    """
+    MetaLight用计算梯度，用了两组不同的采样计算子模型和元模型的梯度，并返回和params形状一样的dict
+    """
     def second_cal_grads(self, episodes, slice_index, new_slice_index, params):
         self.load_params(params)
         t1 = time.time()

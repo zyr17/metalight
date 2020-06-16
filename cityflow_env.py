@@ -19,6 +19,11 @@ class Intersection:
         3: 4,
         -1: 0
     }
+    """
+    inter_id: 路口ID
+    dic_traffic_env_conf: 环境配置
+    eng: CityFlow引擎
+    """
     def __init__(self, inter_id, dic_traffic_env_conf, eng):
         self.inter_id = inter_id
         self.inter_name = "intersection_{0}_{1}".format(inter_id[0], inter_id[1])
@@ -71,10 +76,18 @@ class Intersection:
 
         self.dic_feature = {}  # this second
 
+    """
+    根据当前时间设置该路口信号灯。
+        action: 动作整数
+        action_pattern: switch or set
+        yellow_time: 黄灯持续时间
+        all_red_time: 全红灯持续时间，未使用
+    """
     def set_signal(self, action, action_pattern, yellow_time, all_red_time):
         if self.all_yellow_flag:
             # in yellow phase
-            self.flicker = 0
+            # 在黄灯状态，黄灯时间够了就切换
+            self.flicker = 0 # TODO 应该在黄灯时间结束才变回去
             if self.current_phase_duration >= yellow_time: # yellow time reached
                 self.current_phase_index = self.next_phase_to_set_index
                 self.eng.set_tl_phase(self.inter_name, self.current_phase_index) # if multi_phase, need more adjustment
@@ -83,11 +96,12 @@ class Intersection:
                 pass
         else:
             # determine phase
+            # 根据action pattern和action选择下一个阶段
             if action_pattern == "switch": # switch by order
                 if action == 0: # keep the phase
                     self.next_phase_to_set_index = self.current_phase_index
                 elif action == 1: # change to the next phase
-                    self.next_phase_to_set_index = (self.current_phase_index + 1) % len(self.list_phases) # if multi_phase, need more adjustment
+                    self.next_phase_to_set_index = (self.current_phase_index + 1) % len(self.list_phases) # TODO if multi_phase, need more adjustment
                 else:
                     sys.exit("action not recognized\n action must be 0 or 1")
 
@@ -95,6 +109,7 @@ class Intersection:
                 self.next_phase_to_set_index = action + 1  # !!! if multi_phase, need more adjustment
 
             # set phase
+            # 如果阶段变化，需要黄灯
             if self.current_phase_index == self.next_phase_to_set_index: # the light phase keeps unchanged
                 pass
             else: # the light phase needs to change
@@ -153,6 +168,7 @@ class Intersection:
         # update feature
         self._update_feature()
 
+    # 更新离开、进入路口的车辆
     def _update_leave_entering_approach_vehicle(self):
         list_entering_lane_vehicle_left = []
         # update vehicles leaving entering lane
@@ -169,6 +185,7 @@ class Intersection:
                 )
         return list_entering_lane_vehicle_left
 
+    # 更新一系列车辆的到达时间
     def _update_arrive_time(self, list_vehicle_arrive):
         ts = self.get_current_time()
         # get dic vehicle enter leave time
@@ -181,6 +198,7 @@ class Intersection:
                 #sys.exit(-1)
                 pass
 
+    # 更新一系列车辆的离开时间
     def _update_left_time(self, list_vehicle_left):
         ts = self.get_current_time()
         # update the time for vehicle to leave entering lane
@@ -191,6 +209,7 @@ class Intersection:
                 print("vehicle not recorded when entering")
                 sys.exit(-1)
 
+    # 更新TODO
     def _update_feature(self):
         dic_feature = dict()
 
@@ -409,6 +428,9 @@ class CityFlowEnv:
         state = self.get_state()
         return state
 
+    """
+    选择一个action，然后根据该action以及action间隔生成step并通过_inner_step模拟
+    """
     def step(self, action):
         list_action_in_sec = [action]
         list_action_in_sec_display = [action]
@@ -473,7 +495,7 @@ class CityFlowEnv:
                 all_red_time=self.dic_traffic_env_conf["ALL_RED_TIME"]
             )
 
-        # run one step
+        # run one second
         for i in range(int(1/self.dic_traffic_env_conf["INTERVAL"])):
             self.eng.next_step()
         # get new measurements
@@ -492,6 +514,7 @@ class CityFlowEnv:
         self.eng.load_flow(os.path.join(self.path_to_work_directory, self.dic_traffic_env_conf["FLOW_FILE"]))
         print("successfully load flowFile: ", self.dic_traffic_env_conf["FLOW_FILE"])
 
+    # 当总时间超过设置时间；或者是第0?条车道长度超过39的次数超过100次(堵车很久)就结束
     def _check_episode_done(self, state):
         if self.get_current_time() >= self.dic_traffic_env_conf['EPISODE_LEN']:
             return True
@@ -539,6 +562,7 @@ class CityFlowEnv:
                                                     "state": before_action_feature[inter_ind],
                                                     "action": action[inter_ind]})
 
+    # 记录车辆进出时间、检查队列最大值是否满足要求、保存完整回放
     def bulk_log(self):
         valid_flag = {}
         for inter_ind in range(len(self.list_intersection)):

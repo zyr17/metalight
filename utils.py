@@ -41,6 +41,7 @@ def get_total_traffic_volume(traffic_file):
         vol = int(traffic.split("_")[-1])
         return vol
 
+# 统计车辆行驶平均时间等并写入文件
 def write_summary(dic_path, test_traffic, episode_len, cnt_round, flow_file="flow.json"):
     record_dir = os.path.join(dic_path["PATH_TO_WORK_DIRECTORY"], "test_round", test_traffic,
                               "tasks_round_" + str(cnt_round))
@@ -108,6 +109,7 @@ def write_summary(dic_path, test_traffic, episode_len, cnt_round, flow_file="flo
         round_summary = pd.DataFrame(round_summary)
         round_summary.to_csv(path_to_seg_log, mode="a", index=False, header=False)
 
+# 计算每个flow的车辆进入时间，需要为整数
 def get_planed_entering(flowFile, episode_len):
     # todo--check with huichu about how each vehicle is inserted, according to the interval. 1s error may occur.
     list_flow = json.load(open(flowFile, "r"))
@@ -130,6 +132,7 @@ def get_planed_entering(flowFile, episode_len):
     return df
     #return pd.DataFrame(dic_traj).transpose()
 
+# 计算行驶时间
 def cal_travel_time(df_vehicle_actual_enter_leave, df_vehicle_planed_enter, episode_len):
     df_vehicle_planed_enter.set_index('vehicle_id', inplace=True)
     df_vehicle_actual_enter_leave.set_index('vehicle_id', inplace=True)

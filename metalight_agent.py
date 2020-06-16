@@ -66,6 +66,9 @@ class MetaLightAgent:
         for policy in self.policy_inter:
             policy.decay_epsilon(batch_id)
 
+    """
+    更新元学习网络参数，返回值为更新后的网络参数的list，长度保持和输入参数长度相同
+    """
     def update_meta_params(self, episodes, slice_index, new_slice_index, _params):
         params = _params[0]
 

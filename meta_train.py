@@ -86,7 +86,7 @@ def main(args):
                 p.join()
 
             if not dic_traffic_env_conf['FIRST_PART']:
-                meta_step(dic_path, dic_agent_conf, dic_traffic_env_conf, batch_id)
+                meta_step(dic_path, dic_agent_conf, dic_traffic_env_conf, batch_id) # TODO: why in maml part?
 
         ## update the epsilon
         decayed_epsilon = dic_agent_conf["EPSILON"] * pow(dic_agent_conf["EPSILON_DECAY"], batch_id)
@@ -269,6 +269,8 @@ def meta_step(dic_path, dic_agent_conf, dic_traffic_env_conf, batch_id):
             dic_traffic_env_conf:   dict,   configuration of traffic environment
             dic_path:           dict,   path of source files and output files
             batch_id:           int,    round number
+
+        读入之前计算出来的梯度和模型参数，然后对参数进行更新并保存
     '''
     grads = []
     try:

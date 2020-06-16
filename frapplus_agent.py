@@ -4,6 +4,7 @@ import numpy as np
 
 from agent import Agent
 
+# 关系矩阵，有共同phase为1否则为0。不包含和自己的关系。
 def relation(lane_phase_info):
     relations = []
     num_phase = len(lane_phase_info["phase"])

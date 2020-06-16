@@ -32,6 +32,9 @@ class MetaLearner(object):
         """
             Use MAML framework to samples trajectories before and after the update of the parameters
             for all the tasks. Then, update meta-parameters.
+
+            收集一个完整的样本，然后从里面采SAMPLE_SIZE个样来计算梯度
+            梯度保存成文件 TODO 涉及meta的部分是在干什么？感觉是不训练meta结构但是保留参数？
         """
         self.batch_id = batch_id
         tasks = [task] * self.dic_traffic_env_conf['FAST_BATCH_SIZE']
