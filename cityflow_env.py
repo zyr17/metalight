@@ -557,11 +557,11 @@ class CityFlowEnv:
                 valid_flag[inter_ind] = 1
         json.dump(valid_flag, open(os.path.join(self.path_to_log, "valid_flag.json"), "w"))
 
-        #for inter_ind in range(len(self.list_inter_log)):
-        #    path_to_log_file = os.path.join(self.path_to_log, "inter_{0}.pkl".format(inter_ind))
-        #    f = open(path_to_log_file, "wb")
-        #    pickle.dump(self.list_inter_log[inter_ind], f)
-        #    f.close()
+        for inter_ind in range(len(self.list_inter_log)):
+            path_to_log_file = os.path.join(self.path_to_log, "inter_{0}.pkl".format(inter_ind))
+            f = open(path_to_log_file, "wb")
+            pickle.dump(self.list_inter_log[inter_ind], f)
+            f.close()
         self.log_replay()
 
     def log_replay(self):

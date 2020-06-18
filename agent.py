@@ -283,8 +283,9 @@ class Agent():
         self.load_params(params)
         t1 = time.time()
 
-        if not second_index:
-            second_index = slice_index
+        #if not second_index:
+        #    second_index = slice_index
+        second_index = slice_index
 
         with self._sess.as_default():
             with self._sess.graph.as_default():

@@ -191,7 +191,7 @@ def summary_sotl(memo):
         duration_each_round_list = []
         queue_length_each_round_list = []
 
-        train_dir = os.path.join(records_dir, traffic_file)
+        train_dir = os.path.join(records_dir, traffic_file, 'test_round', traffic_file[:-15], 'tasks_round_0')
         # summary items (queue_length) from pickle
         f = open(os.path.join(train_dir, "inter_0.pkl"), "rb")
         try:
